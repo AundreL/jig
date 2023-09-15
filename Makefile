@@ -6,8 +6,8 @@ DOCKER_VOLUME = './:/app-home/'
 build-all: clean build-docker build 
 
 .PHONY: build
-build: jig.go
-	go build -o binary/jig
+build: jig.rs
+	rustc jig.rs -o binary/jig
 
 .PHONY: build-docker
 build-docker: docker/Dockerfile
@@ -20,7 +20,7 @@ test:
 	binary/jig
 
 .PHONY: build-in-container
-build-in-container: jig.go
+build-in-container: jig.rs
 	mkdir -p binary
 	docker run -v $(DOCKER_VOLUME) $(DOCKER_IMAGE) build
 

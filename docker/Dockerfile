@@ -1,4 +1,4 @@
-FROM golang:1.21.0-alpine3.18 
+FROM rust:1-alpine3.18 
 
 RUN apk update && \
     apk upgrade && \
