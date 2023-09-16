@@ -1,2 +1,7 @@
 binary
 logs
+
+
+# Added by cargo
+
+/target

@@ -7,7 +7,7 @@ build-all: clean build-docker build
 
 .PHONY: build
 build: jig.rs
-	rustc jig.rs -o binary/jig
+	cargo build
 
 .PHONY: build-docker
 build-docker: docker/Dockerfile
@@ -21,7 +21,6 @@ test:
 
 .PHONY: build-in-container
 build-in-container: jig.rs
-	mkdir -p binary
 	docker run -v $(DOCKER_VOLUME) $(DOCKER_IMAGE) build
 
 .PHONY: test-env
