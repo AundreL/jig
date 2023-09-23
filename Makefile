@@ -9,6 +9,10 @@ build-all: clean build-docker build
 build: jig.rs
 	cargo build
 
+.PHONY: run
+run:
+	cargo run -- --help
+
 .PHONY: build-docker
 build-docker: docker/Dockerfile
 	docker build -t $(DOCKER_IMAGE) docker
