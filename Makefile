@@ -19,6 +19,10 @@ build-docker: docker/Dockerfile
 	docker container prune -f
 	docker image prune -f
 
+.PHONY: prep-env
+prep-env:
+	set -x PATH target/debug $PATH
+
 .PHONY: test
 test:	
 	binary/jig

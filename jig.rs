@@ -8,15 +8,19 @@ use clap::Parser;
 #[command(author, version, about, long_about=None)]
 struct Args {
     #[arg(short, long)]
-    name: String,
-    #[arg(short, long, default_value_t =1 )]
-    count: u8
+    dotsync: bool,
 }
+
+//const DEFAULT_NVIM_CONFIG_LOCATION:&str = ".config/nvim/init.vim";
 
 fn main() {
     let args = Args::parse();
     
-    for _ in 0..args.count {
-        println!("arg {}", args.name);
+    if args.dotsync == true{
+        dotsync();
     }
+}
+
+fn dotsync(){
+    println!("dotsync not implemented");
 }
