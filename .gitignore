@@ -1,7 +1,7 @@
-binary
-logs
-
+/logs
 
 # Added by cargo
-
+Cargo.lock
+/debug
 /target
+**/*.rs.bk
