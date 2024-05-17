@@ -8,6 +8,3 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.4.4", features = ["derive"] }
 
-[[bin]]
-name = "jig"
-path = "jig.rs"
