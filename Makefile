@@ -1,21 +1,32 @@
-DOCKER_IMAGE = test-container
-DOCKER_VOLUME = './:/app-home/'
+DOCKER_IMAGE_ALPINE = alpine-env
+DOCKER_IMAGE_DEBIAN= debian-env 
+DOCKER_VOLUME = './:/jig-test-env/'
 #use sudo -s switch to load caller environment
 
-.PHONY: build-all
-build-all: clean build-docker build 
+default: help
+
+.PHONY: help
+help: #jig make file commands
+	@grep -E '^[a-za-z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m: $$(echo $$l | cut -f 2- -d'#')\n"; done
+
+.PHONY: build-all 
+build-all: clean build-docker build #clean build
 
 .PHONY: build
-build: jig.rs
+build: jig.rs #build only jig executable
 	cargo build
 
-.PHONY: run
-run:
-	cargo run -- --help
+.PHONY: test
+test: #test jig
+	cargo test
 
 .PHONY: build-docker
-build-docker: docker/Dockerfile
-	docker build -t $(DOCKER_IMAGE) docker
+build-docker: docker/Dockerfile.ctalpine docker/Dockerfile.ctdebian #build-docker
+	$(info $(DOCKER_IMAGE_ALPINE))
+	$(info $(DOCKER_IMAGE_DEBIAN))
+	ls docker	
+	docker build -t $(DOCKER_IMAGE_ALPINE) -f ./docker/Dockerfile.ctalpine .
+	docker build -t $(DOCKER_IMAGE_DEBIAN) -f ./docker/Dockerfile.ctdebian . 
 	docker container prune -f
 	docker image prune -f
 
@@ -23,9 +34,9 @@ build-docker: docker/Dockerfile
 prep-env:
 	set -x PATH target/debug $PATH
 
-.PHONY: test
-test:	
-	binary/jig
+.PHONY: run-con
+run-con: #start docker shell
+	docker run --entrypoint /bin/sh -it test-container
 
 .PHONY: build-in-container
 build-in-container: jig.rs
@@ -47,3 +58,4 @@ docker-clean:
 .PHONY: clean
 clean:
 	rm  -rf binary
+
