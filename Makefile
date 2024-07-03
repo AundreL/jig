@@ -18,25 +18,36 @@ build: jig.rs #build only jig executable
 
 .PHONY: test
 test: #test jig
+	QUICK_FLAG=0
+	$(info $(QUICK_FLAG))
 	cargo test
 
-.PHONY: build-docker
-build-docker: docker/Dockerfile.ctalpine docker/Dockerfile.ctdebian #build-docker
-	$(info $(DOCKER_IMAGE_ALPINE))
-	$(info $(DOCKER_IMAGE_DEBIAN))
-	ls docker	
+.PHONY: quick-test
+quick-test: #test using cached mock data not going online
+	QUICK_FLAG=1
+	$(info $(QUICK_FLAG))
+	
+	cargo test
+
+.PHONY: base-build-docker
+base-build-docker: docker/Dockerfile.ctalpine docker/Dockerfile.ctdebian
 	docker build -t $(DOCKER_IMAGE_ALPINE) -f ./docker/Dockerfile.ctalpine .
 	docker build -t $(DOCKER_IMAGE_DEBIAN) -f ./docker/Dockerfile.ctdebian . 
-	docker container prune -f
-	docker image prune -f
+
+.PHONY: build-docker
+build-docker: base-build-docker docker-clean 
 
 .PHONY: prep-env
 prep-env:
 	set -x PATH target/debug $PATH
 
-.PHONY: run-con
-run-con: #start docker shell
-	docker run --entrypoint /bin/sh -it test-container
+.PHONY: run-deb
+run-deb: #start docker debian container terminal
+	docker run --entrypoint /bin/sh -it debian-env
+
+.PHONY: run-alp
+run-alp: #start docker alpine container terminal
+	docker run --entrypoint /bin/sh -it alpine-env
 
 .PHONY: build-in-container
 build-in-container: jig.rs
@@ -52,10 +63,10 @@ dry-run:
 
 .PHONY: docker-clean
 docker-clean:
+	#clean up dangling containers and images
 	docker container prune -f
 	docker image prune -f
 
 .PHONY: clean
 clean:
-	rm  -rf binary
-
+	rm  -rf target

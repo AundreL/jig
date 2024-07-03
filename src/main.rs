@@ -20,14 +20,15 @@ enum Commands{
 
 //const DEFAULT_NVIM_CONFIG_LOCATION:&str = ".config/nvim/init.vim";
 
-fn main() {  
+fn main() {   
+    
     let args = Args::parse();
-
+    
     println!("{:?}", args);
-
+   
     match args.command {
         Commands::Dotsync{} => {
-            println!("dotsync")
+            dotsync();
         }
         Commands::Update{} => {
             println!("update")
@@ -35,6 +36,17 @@ fn main() {
     }
 }
 
-//fn dotsync(){
-    //println!("dotsync not implemented");
-//}
+fn dotsync() ->i64 {
+    panic!("dotsync not implemented");
+}
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_dotsync(){
+        dotsync();
+    }
+}
