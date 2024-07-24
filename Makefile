@@ -1,5 +1,5 @@
 DOCKER_IMAGE_ALPINE = alpine-env
-DOCKER_IMAGE_DEBIAN= debian-env 
+DOCKER_IMAGE_DEBIAN = debian-env 
 DOCKER_VOLUME = './:/jig-test-env/'
 #use sudo -s switch to load caller environment
 
@@ -23,11 +23,14 @@ test: #test jig
 	cargo test
 
 .PHONY: quick-test
-quick-test: #test using cached mock data not going online
-	QUICK_FLAG=1
-	$(info $(QUICK_FLAG))
-	
-	cargo test
+quick-test: clean-temp#test using cached mock data not going online
+	$(eval QUICK_FLAG := 1)
+	$(info quick flag: $(QUICK_FLAG))
+
+	$(eval $@_MOCK_TEMP_LOCATION := $(shell mktemp -d -t jig-test-XXXXXXXX))
+	$(info mock file: $($@_MOCK_TEMP_LOCATION))
+
+	@cargo test
 
 .PHONY: base-build-docker
 base-build-docker: docker/Dockerfile.ctalpine docker/Dockerfile.ctdebian
@@ -66,6 +69,10 @@ docker-clean:
 	#clean up dangling containers and images
 	docker container prune -f
 	docker image prune -f
+
+.PHONY: clean-temp
+clean-temp:
+	rm -rf /tmp/jig-test-*
 
 .PHONY: clean
 clean:

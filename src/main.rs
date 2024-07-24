@@ -40,13 +40,18 @@ fn dotsync() ->i64 {
     panic!("dotsync not implemented");
 }
 
+fn locate_and_read_jigconfig() -> (){
+    panic!("not implemented");
+}
+
 #[cfg(test)]
 mod tests{
     use super::*;
 
     #[test]
     #[should_panic]
-    fn test_dotsync(){
+    fn test_dotsync(){ 
+        locate_and_read_jigconfig();
         dotsync();
     }
 }
