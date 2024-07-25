@@ -1,5 +1,5 @@
 /logs
-/cache
+/.cache
 
 # Added by cargo
 Cargo.lock

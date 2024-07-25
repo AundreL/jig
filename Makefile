@@ -1,6 +1,7 @@
-DOCKER_IMAGE_ALPINE = alpine-env
-DOCKER_IMAGE_DEBIAN = debian-env 
-DOCKER_VOLUME = './:/jig-test-env/'
+DOCKER_IMAGE_ALPINE = jig-alpine
+DOCKER_IMAGE_DEBIAN = jig-debian
+MOCK_LOCATION := $(realpath ./test/mock-data)
+DOCKER_VOLUME := $(realpath ./.volume-cache)
 #use sudo -s switch to load caller environment
 
 default: help
@@ -22,23 +23,9 @@ test: #test jig
 	$(info $(QUICK_FLAG))
 	cargo test
 
-.PHONY: quick-test
-quick-test: clean-temp#test using cached mock data not going online
-	$(eval QUICK_FLAG := 1)
-	$(info quick flag: $(QUICK_FLAG))
-
-	$(eval $@_MOCK_TEMP_LOCATION := $(shell mktemp -d -t jig-test-XXXXXXXX))
-	$(info mock file: $($@_MOCK_TEMP_LOCATION))
-
-	@cargo test
-
-.PHONY: base-build-docker
-base-build-docker: docker/Dockerfile.ctalpine docker/Dockerfile.ctdebian
-	docker build -t $(DOCKER_IMAGE_ALPINE) -f ./docker/Dockerfile.ctalpine .
-	docker build -t $(DOCKER_IMAGE_DEBIAN) -f ./docker/Dockerfile.ctdebian . 
-
-.PHONY: build-docker
-build-docker: base-build-docker docker-clean 
+.PHONY: unit-test
+unit-test: load-volume#do unit tests on mock data
+	docker run -v $(DOCKER_VOLUME):/app-home:ro -it --entrypoint '/bin/sh' $(DOCKER_IMAGE_DEBIAN)
 
 .PHONY: prep-env
 prep-env:
@@ -46,33 +33,43 @@ prep-env:
 
 .PHONY: run-deb
 run-deb: #start docker debian container terminal
-	docker run --entrypoint /bin/sh -it debian-env
+	docker run --entrypoint /bin/sh -it $(DOCKER_IMAGE_DEBIAN)
 
 .PHONY: run-alp
 run-alp: #start docker alpine container terminal
-	docker run --entrypoint /bin/sh -it alpine-env
+	docker run --entrypoint /bin/sh -it $(DOCKER_IMAGE_ALPINE) 
 
-.PHONY: build-in-container
-build-in-container: jig.rs
-	docker run -v $(DOCKER_VOLUME) $(DOCKER_IMAGE) build
 
 .PHONY: test-env
 test-env:
-	docker run -v $(DOCKER_VOLUME) --entrypoint '/bin/sh' $(DOCKER_IMAGE)  
+	docker run -it --entrypoint '/bin/sh' $(DOCKER_IMAGE_DEBIAN)  
 
 .PHONY: dry-run
 dry-run:
 	docker run -it -v $(DOCKER_VOLUME) $(DOCKER_IMAGE)
 
-.PHONY: docker-clean
-docker-clean:
+.PHONY: base-build-docker
+base-build-docker: docker/Dockerfile.ctalpine docker/Dockerfile.ctdebian
+	docker build -t $(DOCKER_IMAGE_ALPINE) -f ./docker/Dockerfile.ctalpine .
+	docker build -t $(DOCKER_IMAGE_DEBIAN) -f ./docker/Dockerfile.ctdebian . 
+
+.PHONY: build-docker
+build-docker: clean-docker base-build-docker #build docker images
+
+load-volume: 
+	mkdir -p $(DOCKER_VOLUME) 
+	cp -r $(MOCK_LOCATION) $(DOCKER_VOLUME)
+
+.PHONY: clean-docker
+clean-docker:
 	#clean up dangling containers and images
 	docker container prune -f
 	docker image prune -f
 
-.PHONY: clean-temp
-clean-temp:
-	rm -rf /tmp/jig-test-*
+.PHONY: clean-cache
+clean-cache:
+	rm -rf ./cache
+	mkdir ./cache
 
 .PHONY: clean
 clean:
