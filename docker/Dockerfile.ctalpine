@@ -1,0 +1,14 @@
+FROM alpine:3.20
+
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
+      gcompat make
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /home/appuser
+USER appuser
+
+ENTRYPOINT [ "make" ]
+CMD [ "test" ]

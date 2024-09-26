@@ -1,0 +1,11 @@
+FROM debian:12.7
+
+RUN apt-get update && apt-get upgrade
+
+RUN addgroup appgroup && useradd appuser -G appgroup
+
+WORKDIR /home/appuser
+USER appuser
+
+ENTRYPOINT [ "make" ]
+CMD [ "test" ]
